@@ -9,7 +9,7 @@ def push_model_to_hub(model_name,lora_ckpt_dir,load_in_8bit):
     peft_model = PeftModel.from_pretrained(model,lora_ckpt_dir)
     peft_model = peft_model.merge_and_unload()
 
-    generate_output(peft_model,"""
+    op = generate_output(peft_model,"""
     Pitt: Hey Teddy! Have you received my message?                                                       
     Teddy: No. An email?                               
     Pitt: No. On the FB messenger.                     
@@ -17,6 +17,8 @@ def push_model_to_hub(model_name,lora_ckpt_dir,load_in_8bit):
     Teddy: Yeah. Ta!                                   
     Summary: 
         """,tokenizer)
+
+    print(op)
 
 
     peft_model.push_to_hub("llama-7b-samsum")
