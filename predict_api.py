@@ -13,7 +13,7 @@ lora_ckpt_dir = "op/checkpoint-50"
 print("model id",model_id)
 # model = AutoModelForCausalLM.from_pretrained(model_id,load_in_8bit=True)
 # tokenizer = AutoTokenizer.from_pretrained(model_id)
-model,tokenizer = initialize_model(model_id,True)
+model,tokenizer = initialize_model(model_id)
 peft_model = PeftModel.from_pretrained(model,lora_ckpt_dir)
 peft_model = peft_model.merge_and_unload()
 

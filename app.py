@@ -1,5 +1,5 @@
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 from datasets import load_dataset
 from peft import (
         get_peft_model, 
@@ -51,8 +51,20 @@ def generate_output(model,prompt,tokenizer):
     return op
 
 
-def initialize_model(model_name,load_in_8bit):
-    model = AutoModelForCausalLM.from_pretrained(model_name,load_in_8bit=load_in_8bit,device_map="auto")
+def initialize_model(model_name,mode='8-bit'):
+    if mode == '4-bit':
+        config = BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_compute_dtype=torch.bfloat16,
+            bnb_4bit_quant_type='nf4',
+            bnb_4bit_use_double_quant=False
+        )
+    elif mode == '8-bit':
+        config = BitsAndBytesConfig(
+            load_in_8bit=True
+        )
+        
+    model = AutoModelForCausalLM.from_pretrained(model_name,device_map="auto",quantization_config=config)
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     tokenizer.add_special_tokens({"pad_token": "<PAD>"})
     model.resize_token_embeddings(len(tokenizer))
@@ -75,7 +87,7 @@ def load_peft_model(model,checkpoint_path):
     peft_model = PeftModel.from_pretrained(model,checkpoint_path,torch_dtype=torch.float16,offload_folder="results/temp")
     return peft_model
 
-def finetune(model,tokenizer,r,train_data,val_data):
+def finetune(model,tokenizer,r,train_data,val_data,mode):
     lora_config = LoraConfig(
         r=r,
         lora_alpha=8,
@@ -91,17 +103,17 @@ def finetune(model,tokenizer,r,train_data,val_data):
 
     model.print_trainable_parameters()
 
-    output_dir = "op"
+    output_dir = mode
     per_device_train_batch_size = 4
     gradient_accumulation_steps = 4
     per_device_eval_batch_size = 4
     eval_accumulation_steps = 4
     optim = "paged_adamw_32bit"
-    save_steps = 10
-    logging_steps = 10
+    save_steps = 100
+    logging_steps = 100
     learning_rate = 5e-4
     max_grad_norm = 0.3
-    max_steps = 50
+    max_steps = 500
     warmup_ratio = 0.03
     evaluation_strategy="steps"
     lr_scheduler_type = "constant"
@@ -146,16 +158,19 @@ def finetune(model,tokenizer,r,train_data,val_data):
 
 
 if __name__ == "__main__":
+    modes = ['8-bit','4-bit']
     train_dataset,test_dataset,val_dataset = initialize_dataset("samsum")
-    model,tokenizer = initialize_model('meta-llama/Llama-2-7b-hf',load_in_8bit=True)
-    sample_prompt = format_prompt(train_dataset[50]['dialogue'],'')
-    print(sample_prompt)
-    output = generate_output(model,sample_prompt,tokenizer)
-    print("Output : ",output)
-    finetune(model,tokenizer,8,test_dataset,val_dataset)
-    peft_model = load_peft_model(model,'op/checkpoint-40')
-    output = generate_output(peft_model,sample_prompt,tokenizer)
-    print("Fine Tuned Output : ", output)
+    for mode in modes:
+        print("Training in ", mode, "mode")
+        model,tokenizer = initialize_model('meta-llama/Llama-2-7b-hf',mode=mode)
+        sample_prompt = format_prompt(train_dataset[50]['dialogue'],'')
+        print(sample_prompt)
+        output = generate_output(model,sample_prompt,tokenizer)
+        print("Output : ",output)
+        finetune(model,tokenizer,8,test_dataset,val_dataset,mode)
+        peft_model = load_peft_model(model,mode + "/" + 'checkpoint-500')
+        output = generate_output(peft_model,sample_prompt,tokenizer)
+        print("Fine Tuned Output : ", output)
 
 
     
