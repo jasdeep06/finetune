@@ -1,0 +1,12 @@
+transformers
+bitsandbytes
+sentencepiece
+transformers[sentencepiece]
+accelerate
+bitsandbytes
+datasets
+peft
+trl
+py7zr
+accelerates
+wandb
