@@ -54,6 +54,8 @@ def generate_output(model,prompt,tokenizer):
 def initialize_model(model_name,load_in_8bit):
     model = AutoModelForCausalLM.from_pretrained(model_name,load_in_8bit=load_in_8bit,device_map="auto")
     tokenizer = AutoTokenizer.from_pretrained(model_name)
+    tokenizer.add_special_tokens({"pad_token": "<PAD>"})
+    model.resize_token_embeddings(len(tokenizer))
     return model,tokenizer
 
 def initialize_dataset(dataset_name):
@@ -82,8 +84,7 @@ def finetune(model,tokenizer,r,train_data,val_data):
         bias="none",
         task_type="CAUSAL_LM",
     )
-    tokenizer.add_special_tokens({"pad_token": "<PAD>"})
-    model.resize_token_embeddings(len(tokenizer))
+    
 
     model = prepare_model_for_kbit_training(model)
     model = get_peft_model(model, lora_config)

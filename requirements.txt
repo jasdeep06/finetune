@@ -10,3 +10,5 @@ trl
 py7zr
 accelerate
 wandb
+fastapi
+"uvicorn[standard]"
