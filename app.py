@@ -32,12 +32,12 @@ def format_prompt(dialogue,summary,eos_token="</s>"):
 
 # prompt = format_prompt(data["train"][50]['dialogue'])
 
-def generate_output(model,prompt,tokenizer):
+def generate_output(model,prompt,tokenizer,num_tokens=1000):
     input_tokens = tokenizer(prompt,return_tensors="pt")["input_ids"].to("cuda")
     with torch.cuda.amp.autocast():
         output = model.generate(
             input_ids = input_tokens,
-            max_new_tokens=1000,
+            max_new_tokens=num_tokens,
             do_sample=True,
             top_k=10,
             top_p=0.9,
