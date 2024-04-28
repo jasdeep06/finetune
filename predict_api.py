@@ -7,12 +7,12 @@ from fastapi import FastAPI
 app = FastAPI()
 
 model_id = "jasdeep06/llama-7b-samsum"
+print("model id",model_id)
 model = AutoModelForCausalLM.from_pretrained(model_id)
-tokenizer = AutoTokenizer.from_pretrained(model)
+tokenizer = AutoTokenizer.from_pretrained(model_id)
 
 @app.post("/generate")
 def read_generate(message: str):
     output = generate_output(model,message,tokenizer)
     return output
 
-    
