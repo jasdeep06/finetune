@@ -2,6 +2,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from typing import Union
 from app import generate_output,initialize_model
 from peft import PeftModel
+import time
 
 from fastapi import FastAPI
 
@@ -18,6 +19,8 @@ peft_model = peft_model.merge_and_unload()
 
 @app.post("/generate")
 def read_generate(message: str):
+    t1 = time.time()
     output = generate_output(peft_model,message,tokenizer)
+    print(time.time() - t1)
     return output
 
