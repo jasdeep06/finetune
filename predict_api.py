@@ -3,7 +3,6 @@ from typing import Union
 from app import generate_output,initialize_model
 from peft import PeftModel
 import time
-import math
 
 from fastapi import FastAPI
 
@@ -28,7 +27,7 @@ def read_generate(message: str,model:str):
         output = generate_output(peft_model_8bit,message,tokenizer_8bit)
     elif model == '4-bit':
         output = generate_output(peft_model_8bit,message,tokenizer_4bit)
-    time_taken = math.round(time.time() - t1,2)
+    time_taken = round(time.time() - t1,2)
     return output,time_taken
 
 
