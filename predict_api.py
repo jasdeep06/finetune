@@ -23,9 +23,9 @@ peft_model_8bit = peft_model_8bit.merge_and_unload()
 @app.post("/generate")
 def read_generate(message: str,model:str):
     t1 = time.time()
-    output = generate_output(peft_model_8bit,message,tokenizer_8bit,num_tokens=100)
+    output,num_tokens = generate_output(peft_model_8bit,message,tokenizer_8bit,num_tokens=100)
     time_taken = round(time.time() - t1,2)
-    return output,time_taken
+    return {'output':output,'time':time_taken,'num_tokens':num_tokens}
 
 
 

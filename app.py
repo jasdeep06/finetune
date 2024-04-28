@@ -34,6 +34,7 @@ def format_prompt(dialogue,summary,eos_token="</s>"):
 
 def generate_output(model,prompt,tokenizer,num_tokens=1000):
     input_tokens = tokenizer(prompt,return_tensors="pt")["input_ids"].to("cuda")
+    input_num_tokens = input_tokens.shape[1]
     with torch.cuda.amp.autocast():
         output = model.generate(
             input_ids = input_tokens,
@@ -47,8 +48,9 @@ def generate_output(model,prompt,tokenizer,num_tokens=1000):
             eos_token_id=tokenizer.eos_token_id,
         )
     op = tokenizer.decode(output[0], skip_special_tokens=True)
-
-    return op
+    output_total_tokens = op.shape[1]
+    generated_tokens = output_total_tokens - input_num_tokens
+    return op,generated_tokens
 
 
 def initialize_model(model_name,mode='8-bit'):
@@ -165,11 +167,11 @@ if __name__ == "__main__":
         model,tokenizer = initialize_model('meta-llama/Llama-2-7b-hf',mode=mode)
         sample_prompt = format_prompt(train_dataset[50]['dialogue'],'')
         print(sample_prompt)
-        output = generate_output(model,sample_prompt,tokenizer)
+        output,_ = generate_output(model,sample_prompt,tokenizer)
         print("Output : ",output)
         finetune(model,tokenizer,8,test_dataset,val_dataset,mode)
         peft_model = load_peft_model(model,mode + "/" + 'checkpoint-500')
-        output = generate_output(peft_model,sample_prompt,tokenizer)
+        output,_ = generate_output(peft_model,sample_prompt,tokenizer)
         print("Fine Tuned Output : ", output)
 
 
