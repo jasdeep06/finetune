@@ -144,20 +144,20 @@ def finetune(model,tokenizer,r,train_data,val_data):
     trainer.save_model(f"{output_dir}/final")
 
 
-    if __name__ == "__main__":
-        train_dataset,test_dataset,val_dataset = initialize_dataset("samsum")
-        model,tokenizer = initialize_model('meta-llama/Llama-2-7b-hf',load_in_8bit=False)
-        sample_prompt = format_prompt(train_dataset[50]['dialogue'],'')
-        print(sample_prompt)
-        output = generate_output(model,sample_prompt,tokenizer)
-        print("Output : ",output)
-        finetune(model,tokenizer,8,test_dataset,val_dataset)
-        peft_model = load_peft_model(model,'op/checkpoint-40')
-        output = generate_output(peft_model,sample_prompt,tokenizer)
-        print("Fine Tuned Output : ", output)
+if __name__ == "__main__":
+    train_dataset,test_dataset,val_dataset = initialize_dataset("samsum")
+    model,tokenizer = initialize_model('meta-llama/Llama-2-7b-hf',load_in_8bit=False)
+    sample_prompt = format_prompt(train_dataset[50]['dialogue'],'')
+    print(sample_prompt)
+    output = generate_output(model,sample_prompt,tokenizer)
+    print("Output : ",output)
+    finetune(model,tokenizer,8,test_dataset,val_dataset)
+    peft_model = load_peft_model(model,'op/checkpoint-40')
+    output = generate_output(peft_model,sample_prompt,tokenizer)
+    print("Fine Tuned Output : ", output)
 
 
-        
+    
 
 
 

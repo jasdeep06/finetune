@@ -8,5 +8,5 @@ datasets
 peft
 trl
 py7zr
-accelerates
+accelerate
 wandb
