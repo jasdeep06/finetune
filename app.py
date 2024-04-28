@@ -48,7 +48,7 @@ def generate_output(model,prompt,tokenizer,num_tokens=1000):
             eos_token_id=tokenizer.eos_token_id,
         )
     op = tokenizer.decode(output[0], skip_special_tokens=True)
-    output_total_tokens = op.shape[1]
+    output_total_tokens = output.shape[1]
     generated_tokens = output_total_tokens - input_num_tokens
     return op,generated_tokens
 
