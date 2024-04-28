@@ -4,7 +4,8 @@ from datasets import load_dataset
 from peft import (
         get_peft_model, 
         prepare_model_for_kbit_training, 
-        LoraConfig
+        LoraConfig,
+        PeftModel
     )
 import transformers
 from trl import SFTTrainer
@@ -68,6 +69,9 @@ def formatting_func(example):
 
   return output
 
+def load_peft_model(model,checkpoint_path):
+    peft_model = PeftModel.from_pretrained(model,checkpoint_path,torch_dtype=torch.float16,offload_folder="results/temp")
+    return peft_model
 
 def finetune(model,tokenizer,r,train_data,val_data):
     lora_config = LoraConfig(
@@ -148,6 +152,10 @@ def finetune(model,tokenizer,r,train_data,val_data):
         output = generate_output(model,sample_prompt,tokenizer)
         print("Output : ",output)
         finetune(model,tokenizer,8,test_dataset,val_dataset)
+        peft_model = load_peft_model(model,'op/checkpoint-40')
+        output = generate_output(peft_model,sample_prompt,tokenizer)
+        print("Fine Tuned Output : ", output)
+
 
         
 
