@@ -147,7 +147,7 @@ def finetune(model,tokenizer,r,train_data,val_data):
 
 if __name__ == "__main__":
     train_dataset,test_dataset,val_dataset = initialize_dataset("samsum")
-    model,tokenizer = initialize_model('meta-llama/Llama-2-7b-hf',load_in_8bit=False)
+    model,tokenizer = initialize_model('meta-llama/Llama-2-7b-hf',load_in_8bit=True)
     sample_prompt = format_prompt(train_dataset[50]['dialogue'],'')
     print(sample_prompt)
     output = generate_output(model,sample_prompt,tokenizer)
